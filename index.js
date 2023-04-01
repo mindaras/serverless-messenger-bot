@@ -13,7 +13,7 @@ module.exports.handler = async () => {
   } else if (hours === 13) {
     message = "Good afternoon";
   } else if (hours === 22) {
-    groupMessage = "Goodnight";
+    message = "Goodnight";
   }
 
   if (!message) return { hours, message: "not sent" };
@@ -37,7 +37,7 @@ module.exports.handler = async () => {
     await wait(5000);
     await page.goto("https://www.messenger.com/t/2543987712293419");
     await wait(10000);
-    await page.keyboard.type(groupMessage);
+    await page.keyboard.type(message);
     await page.keyboard.press("Enter");
     await browser.close();
   } catch (e) {
