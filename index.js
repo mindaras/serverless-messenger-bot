@@ -1,20 +1,28 @@
 const puppeteer = require("puppeteer-core");
 const chromium = require("@sparticuz/chromium");
+const { Configuration, OpenAIApi } = require("openai");
+
+const configuration = new Configuration({
+  apiKey: "",
+});
+const openai = new OpenAIApi(configuration);
 
 const wait = (milliseconds) =>
   new Promise((res) => setTimeout(res, milliseconds));
 
 module.exports.handler = async () => {
-  let message;
   const hours = new Date().getUTCHours() + 3;
 
-  if (hours === 8) {
-    message = "Good morning";
-  } else if (hours === 13) {
-    message = "Good afternoon";
-  } else if (hours === 22) {
-    message = "Goodnight";
-  }
+  if (hours !== 8) return;
+
+  const response = await openai.createChatCompletion({
+    model: "gpt-3.5-turbo",
+    messages: [{ role: "user", content: "Tell me a random fact" }],
+    temperature: 0.6,
+    max_tokens: 100,
+  });
+
+  const message = response?.data?.choices?.[0]?.message?.content;
 
   if (!message) return { hours, message: "not sent" };
 
@@ -37,7 +45,25 @@ module.exports.handler = async () => {
     await wait(5000);
     await page.goto("https://www.messenger.com/t/2543987712293419");
     await wait(10000);
-    await page.keyboard.type(message);
+    const lines = message.split("\n");
+
+    lines.unshift("Fact of the day:");
+
+    const nextLine = async () => {
+      await page.keyboard.down("Shift");
+      await page.keyboard.press("Enter");
+      await page.keyboard.up("Shift");
+    };
+
+    for (const line of lines) {
+      if (line === "") {
+        await nextLine();
+      } else {
+        await page.keyboard.type(line);
+        await nextLine();
+      }
+    }
+
     await page.keyboard.press("Enter");
     await browser.close();
   } catch (e) {
