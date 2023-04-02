@@ -12,4 +12,4 @@ functions:
     memorySize: 1600
     timeout: 60
     events:
-      - schedule: cron(0 * * * * *)
+      - schedule: cron(0 * * * ? *)
