@@ -65,6 +65,7 @@ module.exports.handler = async () => {
     }
 
     await page.keyboard.press("Enter");
+    await wait(1000);
     await browser.close();
   } catch (e) {
     return { error: e?.message };
